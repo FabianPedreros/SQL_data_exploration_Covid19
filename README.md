@@ -1,6 +1,8 @@
 # SQL_data_exploration_Covid19
 Data exploration with SQL to a Covid 19 dataset
 
+Here you can find the [SQL file](https://github.com/FabianPedreros/SQL_data_exploration_Covid19/blob/main/SQLDataExplorationCovid19.sql)
+
 ## Objective
 Make some basic data exploration on SQL to understand a given data set.
 
