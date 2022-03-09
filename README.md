@@ -336,3 +336,55 @@ Querying COVID_DB_WORLD view
 ![image](https://user-images.githubusercontent.com/32172901/157372982-1416b335-e0f0-4833-987d-4fab9328122a.png)
 
 
+### Some analysis by country
+
+Top five countries by people fully vaccinated
+
+    SELECT TOP 5 location, MAX(CAST(people_fully_vaccinated AS INT)) AS Fully_vaccinated
+    FROM COVID_DB_COUNTRIES
+    GROUP BY location
+    ORDER BY Fully_vaccinated DESC
+
+![image](https://user-images.githubusercontent.com/32172901/157375412-721f9937-6218-42d9-805d-ee8147d9de82.png)
+
+
+Top five countries by people fully vaccinated over population
+
+    SELECT TOP 5 location, MAX(CAST(people_fully_vaccinated AS INT)/population)*100 AS Percentage_Fully_vaccinated
+    FROM COVID_DB_COUNTRIES
+    GROUP BY location
+    ORDER BY Percentage_Fully_vaccinated DESC
+
+![image](https://user-images.githubusercontent.com/32172901/157375505-9fe1ad54-cf74-4c94-9d85-a80fb6f1f0f3.png)
+
+
+Top five countries by less people fully vaccinated NOT NULL
+
+    SELECT TOP 5 location, MAX(CAST(people_fully_vaccinated AS INT)/population)*100 AS Percentage_Fully_vaccinated
+    FROM COVID_DB_COUNTRIES
+    GROUP BY location
+    ORDER BY Percentage_Fully_vaccinated DESC
+
+![image](https://user-images.githubusercontent.com/32172901/157375606-064e498c-b8b8-48c8-9e8f-c18bf3de29b5.png)
+
+
+Top five countries by less people fully vaccinated over population NOT NULL
+
+    SELECT TOP 5 location, MAX(CAST(people_fully_vaccinated AS INT)/population)*100 AS Percentage_Fully_vaccinated
+    FROM COVID_DB_COUNTRIES
+    GROUP BY location
+    HAVING MAX(CAST(people_fully_vaccinated AS INT)/population)*100 > 0
+    ORDER BY Percentage_Fully_vaccinated
+
+![image](https://user-images.githubusercontent.com/32172901/157375697-87cf10fc-8f54-49a7-a991-7dfe7dcdcb92.png)
+
+### Some analysis by income
+
+    SELECT location as income, SUM(CAST (new_cases AS BIGINT)) AS cases, SUM(CAST(new_deaths AS BIGINT)) AS deaths, SUM(CAST(new_vaccinations AS BIGINT)) as vaccinations
+    FROM COVID_DB_INCOME
+    GROUP BY location
+    ORDER BY cases DESC
+
+![image](https://user-images.githubusercontent.com/32172901/157375826-d1003f4b-5d85-4f65-b87d-e14e98db54f6.png)
+
+
