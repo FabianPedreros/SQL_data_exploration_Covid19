@@ -23,37 +23,41 @@ Make some basic data exploration on SQL to understand a given data set.
 
 ## SQL queries
 
-![image](https://user-images.githubusercontent.com/32172901/157167889-d3770f9c-bde9-48c7-abd7-80606c456fdf.png)
+Query all the CovidDeaths data order by location and then for date.
 
-![image](https://user-images.githubusercontent.com/32172901/157167917-acf135ae-7d41-4301-a926-b56cbd14427e.png)
 
-![image](https://user-images.githubusercontent.com/32172901/157167947-08a3cd75-ed13-4168-b0af-5b9536e641d4.png)
+    SELECT * FROM  Covid19..CovidDeaths
+    ORDER BY 3, 4;
 
-![image](https://user-images.githubusercontent.com/32172901/157168011-21a8645f-c1f6-4b6f-ba20-71330dafbc27.png)
+    SELECT location, date, total_cases, new_cases, total_deaths, population
+    FROM Covid19..CovidDeaths
 
-![image](https://user-images.githubusercontent.com/32172901/157168037-6040a778-1c59-4964-b36e-dafb71dd6a4e.png)
+    WHERE total_cases IS NOT NULL
 
-![image](https://user-images.githubusercontent.com/32172901/157168098-b097f195-1e65-431e-ab30-993813fc4c74.png)
+    ORDER BY 1, 2;
+    
+![Imagen1](https://user-images.githubusercontent.com/32172901/157368219-e859fa3e-f2e8-44dd-9fe5-58c3e7c149c1.png)
 
-![image](https://user-images.githubusercontent.com/32172901/157168121-1254bce2-8aca-48dd-8d4f-6a4b5ed37273.png)
 
-![image](https://user-images.githubusercontent.com/32172901/157168145-8972012c-0112-43ed-86ec-bdbaae59a277.png)
+Query  the columns we are interested
 
-![image](https://user-images.githubusercontent.com/32172901/157168176-e22652a6-2f45-4722-b14d-9351aef5f4db.png)
-
-![image](https://user-images.githubusercontent.com/32172901/157168247-424f63c1-2bdb-437b-bbe8-88621e7dc1bf.png)
-
-![image](https://user-images.githubusercontent.com/32172901/157168355-14ab233c-9e35-42fa-8c91-549005de5943.png)
-
-![image](https://user-images.githubusercontent.com/32172901/157168372-cbfa2c75-22ab-48f0-9c98-09a3bc00748d.png)
-
-![image](https://user-images.githubusercontent.com/32172901/157168394-50375b15-a714-4081-b58c-4ff3266e5968.png)
-
-![image](https://user-images.githubusercontent.com/32172901/157168410-beb00cf4-9a89-4ffa-9dac-5f66a08ec1a0.png)
+    SELECT location, date, total_cases, new_cases, total_deaths, population
+    FROM Covid19..CovidDeaths
+    WHERE total_cases IS NOT NULL
+    ORDER BY 1, 2;
+    
+ ![image](https://user-images.githubusercontent.com/32172901/157369641-0a355277-96f8-45c1-a31f-b6176dfa9720.png)
 
 
 
+Calculating the deaths_percentage at Colombia, we have to the 2022-03-02 a total of 6.067.023 cases with a deaths percentage of 2.29%  
 
+    SELECT location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 AS deaths_percentage
+    FROM Covid19..CovidDeaths
+    WHERE total_cases IS NOT NULL AND location LIKE 'Colombia'
+    ORDER BY 1, 2
+
+![image](https://user-images.githubusercontent.com/32172901/157369827-4ff561c9-a6f0-42a6-8c9a-1c9d6d560e03.png)
 
 
 
