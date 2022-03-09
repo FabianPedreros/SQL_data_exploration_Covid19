@@ -60,4 +60,84 @@ Calculating the deaths_percentage at Colombia, we have to the 2022-03-02 a total
 ![image](https://user-images.githubusercontent.com/32172901/157369827-4ff561c9-a6f0-42a6-8c9a-1c9d6d560e03.png)
 
 
+Colombia is at Rank 47 of countries with more deaths percentage.
+
+    SELECT location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 AS deaths_percentage
+    FROM Covid19..CovidDeaths
+    WHERE total_cases IS NOT NULL AND date LIKE '2022-03-02'
+    ORDER BY 5 DESC
+    
+ ![image](https://user-images.githubusercontent.com/32172901/157370138-3258ad48-2735-4f51-9344-df0b7925b075.png)
+
+![image](https://user-images.githubusercontent.com/32172901/157370155-8752a6a7-906f-4ab0-afef-f9df8d3efbce.png)
+
+
+Almost the 11.8% of the population in Colombia have had Covid 
+
+    SELECT location, date, total_cases, population, (total_cases/population)*100 AS cases_percentage
+    FROM Covid19..CovidDeaths
+    WHERE location LIKE 'Colombia'
+    ORDER BY 1, 2;
+
+![image](https://user-images.githubusercontent.com/32172901/157370276-483f38c9-3879-45a8-9628-8bfb2131ac88.png)
+
+
+The top five countries by cases percentage for the total population are countries with low population.
+
+    SELECT TOP 20 location, date, total_cases, population, (total_cases/population)*100 AS cases_percentage
+    FROM Covid19..CovidDeaths
+    WHERE date LIKE '2022-03-02'
+    ORDER BY 5 DESC;
+    
+![image](https://user-images.githubusercontent.com/32172901/157370329-92e1bcb6-27d9-49b7-8940-3dccd32614a5.png)
+
+
+Group by for looking the cases percentages
+
+    SELECT location, population, MAX(total_cases) as HighestInfectionCount, MAX(total_cases/population)*100 as PercentagePopulationInfected
+    FROM Covid19..CovidDeaths GROUP BY location, population
+    ORDER BY PercentagePopulationInfected DESC
+    
+![image](https://user-images.githubusercontent.com/32172901/157370442-1bff98f1-1220-43bf-92de-c23eb66a76b6.png)
+
+
+Showing the countries with highest death count by population
+
+    SELECT location, population, MAX(total_deaths) as HighestDeathsCount, MAX(total_deaths/population)*100 as PercentagePopulationDeath
+    FROM Covid19..CovidDeaths GROUP BY location, population
+    ORDER BY PercentagePopulationDeath DESC
+
+Here we can see that the top countries per percentage deaths by population are south European countries, and the highest rate is for Peru.
+
+![image](https://user-images.githubusercontent.com/32172901/157370589-7a878a5b-ab69-4752-ac68-3c9829f68897.png)
+
+
+Quering the data we can see an error, the total_deaths atrribute has been define as Varchar, so we can use CAST function to used it as an integer.
+
+    SELECT location, MAX(CAST(total_deaths AS INTEGER)) as DeathsCount
+    FROM Covid19..CovidDeaths GROUP BY location
+    ORDER BY DeathsCount DESC
+
+![image](https://user-images.githubusercontent.com/32172901/157370750-0b3b2b3f-ac16-4766-840c-a2a6faf619ba.png)
+
+Querying the data we can see an error, we have aggrupations for continents, region and income. So we have to filter the data.
+All this aggrupations does not have a value in continent.
+
+    SELECT location, MAX(CAST(total_deaths AS INTEGER)) as DeathsCount
+    FROM Covid19..CovidDeaths 
+    WHERE continent IS NOT NULL
+    GROUP BY location
+    ORDER BY DeathsCount DESC
+
+So the top three countries by deaths are USA, Brazil and India.
+
+![image](https://user-images.githubusercontent.com/32172901/157371123-023ca40c-c6ba-4599-93fc-83bedfc5dc07.png)
+
+
+
+
+
+
+
+
 
