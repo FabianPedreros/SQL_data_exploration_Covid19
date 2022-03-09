@@ -28,13 +28,7 @@ Query all the CovidDeaths data order by location and then for date.
 
     SELECT * FROM  Covid19..CovidDeaths
     ORDER BY 3, 4;
-
-    SELECT location, date, total_cases, new_cases, total_deaths, population
-    FROM Covid19..CovidDeaths
-
-    WHERE total_cases IS NOT NULL
-
-    ORDER BY 1, 2;
+    
     
 ![Imagen1](https://user-images.githubusercontent.com/32172901/157368219-e859fa3e-f2e8-44dd-9fe5-58c3e7c149c1.png)
 
@@ -132,6 +126,135 @@ All this aggrupations does not have a value in continent.
 So the top three countries by deaths are USA, Brazil and India.
 
 ![image](https://user-images.githubusercontent.com/32172901/157371123-023ca40c-c6ba-4599-93fc-83bedfc5dc07.png)
+
+
+Breaking Down the deaths count by aggrupations, we can see the total deaths on the world and  Europe, as continent, has the highest quantity.
+
+    SELECT location, MAX(CAST(total_deaths AS INTEGER)) as DeathsCount
+    FROM Covid19..CovidDeaths 
+    WHERE continent IS NULL
+    GROUP BY location
+    ORDER BY DeathsCount DESC
+
+![image](https://user-images.githubusercontent.com/32172901/157371391-ead56c6a-71ce-4ec3-9b6b-c6bbf1320a26.png)
+
+
+Now we want to know the total cases by date
+
+    SELECT date, SUM(new_cases) as Total_cases
+    FROM Covid19..CovidDeaths
+    WHERE continent IS NOT NULL
+    GROUP BY date
+    ORDER BY date
+
+![image](https://user-images.githubusercontent.com/32172901/157371446-b9b24e98-c1b9-4671-9e28-cccc8426a7f1.png)
+
+Now we calculate the total deaths percentage by date
+
+    SELECT date, SUM(new_cases) as Total_cases, SUM(CAST(new_deaths AS int)) as Total_deaths, 100*SUM(CAST(new_deaths AS int))/SUM(new_cases) AS TotalDeathsPercentage
+    FROM Covid19..CovidDeaths
+    WHERE continent IS NOT NULL
+    GROUP BY date
+    ORDER BY date
+
+![image](https://user-images.githubusercontent.com/32172901/157371617-fe4ed7e5-01ff-4277-9e28-618875ede352.png)
+
+
+The total deaths percentage is 1.35% to the date.
+
+    SELECT SUM(new_cases) as Total_cases, SUM(CAST(new_deaths AS int)) as Total_deaths, 100*SUM(CAST(new_deaths AS int))/SUM(new_cases) AS TotalDeathsPercentage
+    FROM Covid19..CovidDeaths
+    WHERE continent IS NOT NULL
+
+![image](https://user-images.githubusercontent.com/32172901/157371704-85aabb61-ad68-4d35-bf7b-a88e08e64724.png)
+
+
+Join the two tables to see the new vaccinations per day
+
+    SELECT DEA.date, DEA.continent, DEA.location,DEA.population, DEA.total_deaths, VAC.new_vaccinations FROM
+    Covid19..CovidDeaths AS DEA JOIN Covid19..CovidVaccinations AS VAC
+    ON DEA.date = VAC.date AND
+    DEA.location = VAC.location
+    WHERE DEA.continent IS NOT NULL
+    ORDER BY DEA.location, DEA.date
+
+![image](https://user-images.githubusercontent.com/32172901/157371875-816d1905-bf7e-41e8-b822-cb9e55b9c63a.png)
+
+Looking at the cumulative quantity new vaccinations per day in Colombia
+
+
+    SELECT DEA.date, DEA.continent, DEA.location,DEA.population, DEA.total_deaths, VAC.new_vaccinations, 
+    SUM(CONVERT(bigint, VAC.new_vaccinations)) OVER (PARTITION BY DEA.location ORDER BY DEA.location, DEA.date) AS CumulativeVaccinations
+    FROM Covid19..CovidDeaths AS DEA JOIN Covid19..CovidVaccinations AS VAC
+    ON DEA.date = VAC.date AND
+    DEA.location = VAC.location
+    WHERE DEA.continent IS NOT NULL AND DEA.location LIKE 'Colombia'
+    ORDER BY DEA.location, DEA.date
+
+![image](https://user-images.githubusercontent.com/32172901/157371972-c789a7e5-5333-468b-82d6-db39e5d7fb8a.png)
+
+
+Calculation of the accumulated percentage of vaccinations
+
+    WITH PopvsVac (date, continent, location, population, total_deaths, vaccinations, CumulativeVaccinations)
+    AS
+    (
+    SELECT DEA.date, DEA.continent, DEA.location,DEA.population, DEA.total_deaths, VAC.new_vaccinations, 
+    SUM(CONVERT(bigint, VAC.new_vaccinations)) OVER (PARTITION BY DEA.location ORDER BY DEA.location, DEA.date) AS CumulativeVaccinations
+    FROM Covid19..CovidDeaths AS DEA JOIN Covid19..CovidVaccinations AS VAC
+    ON DEA.date = VAC.date AND
+    DEA.location = VAC.location
+    WHERE DEA.continent IS NOT NULL AND DEA.location LIKE 'Colombia'
+    )
+    SELECT *, (CumulativeVaccinations/population)*100 AS CumulativeVaccinationsPercentage
+    FROM PopvsVac
+
+![image](https://user-images.githubusercontent.com/32172901/157372084-2f3484cf-702a-401e-8701-2cc472a396fa.png)
+
+
+Calculation of the accumulated percentage of vaccinations with a temp table
+
+    DROP TABLE IF exists #PercentPopulationVaccinated
+    CREATE TABLE #PercentPopulationVaccinated
+
+    (
+    Date date,
+    Continent NVARCHAR(255),
+    Location NVARCHAR(255),
+    Population NUMERIC,
+    New_vaccinations NUMERIC,
+    CumulativeVaccinations BIGINT
+    )
+
+    INSERT INTO #PercentPopulationVaccinated
+
+    SELECT DEA.date, DEA.continent, DEA.location, DEA.population, VAC.new_vaccinations, 
+    SUM(CONVERT(bigint, VAC.new_vaccinations)) OVER (PARTITION BY DEA.location ORDER BY DEA.location, DEA.date) AS CumulativeVaccinations
+    FROM Covid19..CovidDeaths AS DEA JOIN Covid19..CovidVaccinations AS VAC
+    ON DEA.date = VAC.date AND
+    DEA.location = VAC.location
+    WHERE DEA.continent IS NOT NULL AND DEA.location LIKE 'Colombia'
+
+    SELECT *, (CumulativeVaccinations/Population)*100 AS CumulativeVaccinationsPercentage
+    FROM #PercentPopulationVaccinated;
+
+![image](https://user-images.githubusercontent.com/32172901/157372190-575970ba-6018-4d2c-9198-9d60e11c049c.png)
+
+
+Creating a view to be used in data visualization
+
+    DROP VIEW IF EXISTS PercentPopulationVaccinated
+
+    CREATE VIEW PercentPopulationVaccinated AS
+
+        SELECT DEA.date, DEA.continent, DEA.location, DEA.population, VAC.new_vaccinations, 
+        SUM(CONVERT(bigint, VAC.new_vaccinations)) OVER (PARTITION BY DEA.location ORDER BY DEA.location, DEA.date) AS CumulativeVaccinations
+        FROM Covid19..CovidDeaths AS DEA JOIN Covid19..CovidVaccinations AS VAC
+        ON DEA.date = VAC.date AND
+        DEA.location = VAC.location
+        WHERE DEA.continent IS NOT NULL AND DEA.location LIKE 'Colombia'
+
+![image](https://user-images.githubusercontent.com/32172901/157372291-3d5592d8-8116-4a93-956c-2210f0ea4512.png)
 
 
 
