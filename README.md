@@ -256,11 +256,83 @@ Creating a view to be used in data visualization
 
 ![image](https://user-images.githubusercontent.com/32172901/157372291-3d5592d8-8116-4a93-956c-2210f0ea4512.png)
 
+## Views creation for data analysis!
+
+    DROP VIEW IF EXISTS COVID_DB
+    CREATE VIEW dbo.COVID_DB AS
+        SELECT DEA.continent, DEA.location, DEA.date, DEA.population, DEA.total_cases, DEA.new_cases, DEA.total_deaths, DEA.new_deaths,
+        VAC.people_vaccinated, VAC.new_vaccinations, VAC.people_fully_vaccinated
+        FROM Covid19..CovidDeaths AS DEA JOIN Covid19..CovidVaccinations AS VAC
+        ON DEA.date = VAC.date AND
+        DEA.location = VAC.location
+
+Querying COVID_DB view
+
+    SELECT * FROM COVID_DB
+    ORDER BY location, date
+
+![image](https://user-images.githubusercontent.com/32172901/157372481-5832fb60-7629-419d-b422-cdbb4ceaee2c.png)
+
+-- View with only countries data, cleaning aggrupations
+
+DROP VIEW IF EXISTS COVID_DB_COUNTRIES
+
+    CREATE VIEW COVID_DB_COUNTRIES AS
+        SELECT * FROM COVID_DB
+        WHERE continent IS NOT NULL
+
+Querying COVID_DB_COUNTRIES view
+
+    SELECT * FROM COVID_DB_COUNTRIES
+    ORDER BY location, date
+![image](https://user-images.githubusercontent.com/32172901/157372656-71d01b33-f069-4fca-8fa9-06cafea6c150.png)
 
 
+View with data for income aggrupations
+
+    DROP VIEW IF EXISTS COVID_DB_INCOME
+
+    CREATE VIEW COVID_DB_INCOME AS
+        SELECT * FROM COVID_DB
+        WHERE continent IS NULL and location LIKE '%income'
+
+Querying COVID_DB_INCOME view
+
+    SELECT * FROM COVID_DB_INCOME
+    ORDER BY location, date
+
+![image](https://user-images.githubusercontent.com/32172901/157372853-609fa148-f098-4dd8-8a77-b0b4794ca0ea.png)
 
 
+View with data for continents
+
+    DROP VIEW IF EXISTS COVID_DB_CONTINENTS
+
+    CREATE VIEW COVID_DB_CONTINENTS AS
+        SELECT * FROM COVID_DB
+        WHERE continent IS NULL and location IN ('Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America')
+
+Querying COVID_DB_CONTINENTS view
+
+    SELECT * FROM COVID_DB_CONTINENTS
+    ORDER BY location, date
+
+![image](https://user-images.githubusercontent.com/32172901/157372917-72f5245f-4955-49bc-8716-cf51ad557e9c.png)
 
 
+View with data for all the world
+
+    DROP VIEW IF EXISTS COVID_DB_WORLD
+
+    CREATE VIEW COVID_DB_WORLD AS
+        SELECT * FROM COVID_DB
+        WHERE continent IS NULL and location LIKE 'WORLD'
+
+Querying COVID_DB_WORLD view
+
+    SELECT * FROM COVID_DB_WORLD
+    ORDER BY location, date
+
+![image](https://user-images.githubusercontent.com/32172901/157372982-1416b335-e0f0-4833-987d-4fab9328122a.png)
 
 
